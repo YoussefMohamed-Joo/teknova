@@ -7,10 +7,7 @@ export default function Cursor() {
   const trail = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let mx = 0;
-    let my = 0;
-    let tx = 0;
-    let ty = 0;
+    let mx = 0, my = 0, tx = 0, ty = 0;
 
     const onMove = (e: MouseEvent) => {
       mx = e.clientX;
@@ -27,11 +24,11 @@ export default function Cursor() {
 
     const onHover = (e: MouseEvent) => {
       const t = e.target as HTMLElement;
-      const isClickable = t.tagName === "A" || t.tagName === "BUTTON" || !!t.closest("a, button");
-      dot.current?.style.setProperty("width", isClickable ? "32px" : "4px");
-      dot.current?.style.setProperty("height", isClickable ? "32px" : "4px");
-      dot.current?.style.setProperty("background", isClickable ? "transparent" : "white");
-      dot.current?.style.setProperty("border", isClickable ? "1px solid rgba(255,255,255,0.5)" : "none");
+      const c = t.tagName === "A" || t.tagName === "BUTTON" || !!t.closest("a, button");
+      dot.current?.style.setProperty("width", c ? "32px" : "4px");
+      dot.current?.style.setProperty("height", c ? "32px" : "4px");
+      dot.current?.style.setProperty("background", c ? "transparent" : "white");
+      dot.current?.style.setProperty("border", c ? "1px solid rgba(255,255,255,0.4)" : "none");
     };
 
     document.addEventListener("mousemove", onMove);
@@ -46,16 +43,8 @@ export default function Cursor() {
 
   return (
     <>
-      <div
-        ref={dot}
-        className="fixed top-0 left-0 z-[9999] pointer-events-none rounded-full transition-[width,height,background,border] duration-200"
-        style={{ width: 4, height: 4, background: "white" }}
-      />
-      <div
-        ref={trail}
-        className="fixed top-0 left-0 z-[9998] pointer-events-none rounded-full border border-white/10"
-        style={{ width: 24, height: 24 }}
-      />
+      <div ref={dot} className="fixed top-0 left-0 z-[9999] pointer-events-none rounded-full transition-[width,height,background,border] duration-200" style={{ width: 4, height: 4, background: "white" }} />
+      <div ref={trail} className="fixed top-0 left-0 z-[9998] pointer-events-none rounded-full border border-white/10" style={{ width: 24, height: 24 }} />
     </>
   );
 }

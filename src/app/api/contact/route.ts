@@ -1,32 +1,32 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth";
 
-interface ContactBody {
-  name: string;
-  phone: string;
-  email: string;
-  message: string;
-}
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body: ContactBody = await req.json();
-    const { name, phone, email, message } = body;
+    const { name, phone, email, message } = await req.json();
 
-    // validation بسيط
     if (!name || name.length < 2) {
       return NextResponse.json({ error: "الاسم قصير جدًا" }, { status: 400 });
     }
     if (!phone || phone.length < 6) {
       return NextResponse.json({ error: "رقم الهاتف غير صحيح" }, { status: 400 });
     }
-    if (email && !email.includes("@")) {
-      return NextResponse.json({ error: "البريد الإلكتروني غير صحيح" }, { status: 400 });
-    }
 
-    // هنا هنضيف الإيميل أو تخزين في الداتابيز بعدين
-    console.log("New contact:", { name, phone, email, message });
+    // لو المستخدم مسجل، بنربط الرسالة بحسابه
+    const payload = getAuthUser(req);
 
-    return NextResponse.json({ success: true, message: "تم استلام طلبك بنجاح" });
+    await prisma.message.create({
+      data: {
+        name,
+        phone,
+        email: email || "",
+        message: message || "",
+        userId: payload?.userId || null,
+      },
+    });
+
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "خطأ في السيرفر" }, { status: 500 });
   }

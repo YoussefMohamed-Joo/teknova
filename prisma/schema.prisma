@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// المستخدمين (عملاء + أدمن)
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("client") // client | admin
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects   Project[]
+  messages   Message[]
+  testimonials Testimonial?
+}
+
+// مشاريع العملاء
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  status      String   @default("pending") // pending | in-progress | completed
+  category    String?  // web | mobile | system
+  budget      Float?
+  startDate   DateTime?
+  endDate     DateTime?
+  techStack   String?  // JSON array
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  caseStudy CaseStudy?
+}
+
+// دراسة حالة لكل مشروع
+model CaseStudy {
+  id         String   @id @default(cuid())
+  problem    String
+  solution   String
+  result     String
+  techStack  String
+  imageUrl   String?
+  projectId  String   @unique
+  project    Project  @relation(fields: [projectId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+// رسائل التواصل
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+}
+
+// آراء العملاء
+model Testimonial {
+  id        String   @id @default(cuid())
+  content   String
+  rating    Int      @default(5)
+  createdAt DateTime @default(now())
+
+  userId String  @unique
+  user   User    @relation(fields: [userId], references: [id])
+}
+
+// فريق العمل
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  bio       String?
+  imageUrl  String?
+  skills    String   @default("[]") // JSON array
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
